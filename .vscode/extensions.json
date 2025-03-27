@@ -1,10 +1,8 @@
 {
     "recommendations": [
         "platformio.platformio-ide",
-        "danielpinto8zz6.c-cpp-compile-run",
         "ms-vscode.cpptools",
         "ms-vscode.cpptools-extension-pack",
-        "streetsidesoftware.code-spell-checker",
         "cschlosser.doxdocgen",
         "mhutchie.git-graph",
         "donjayamanne.githistory",
@@ -12,21 +10,13 @@
         "johnpapa.vscode-peacock",
         "alefragnani.project-manager",
         "ms-vscode.vscode-serial-monitor",
-        "phu1237.vs-browser",
         "vscode-icons-team.vscode-icons",
-        "wokwi.wokwi-vscode",
-        "moozzyk.arduino",
-        "vsciot-vscode.vscode-arduino",
-        "tonybaloney.vscode-pets",
         "alefragnani.bookmarks",
         "aaron-bond.better-comments",
         "ms-vscode.cpptools-themes",
-        "wayou.vscode-todo-highlight",
         "tomoki1207.pdf",
         "kisstkondoros.vscode-gutter-preview",
         "ritwickdey.liveserver",
-        "parthr2031.colorful-comments",
-        "shahilkumar.docxreader",
         "mateuszchudyk.hexinspector"
     ]
 }
