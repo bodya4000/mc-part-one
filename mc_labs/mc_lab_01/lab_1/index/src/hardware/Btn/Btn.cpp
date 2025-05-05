@@ -1,6 +1,6 @@
 #include <Arduino.h>
-#include "../include/Btn.h"
-#include "../include/Pins.h"
+#include "Btn.h"
+#include "../Pins.h"
 
 Btn::Btn(Pin  pin) : pin(pin) {
   pinMode(static_cast<uint8_t>(pin), INPUT);

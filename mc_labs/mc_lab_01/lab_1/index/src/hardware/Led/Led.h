@@ -1,6 +1,6 @@
 #pragma once
 #include "Color.h"
-#include "Pins.h"
+#include "../Pins.h"
 
 
 class Led {

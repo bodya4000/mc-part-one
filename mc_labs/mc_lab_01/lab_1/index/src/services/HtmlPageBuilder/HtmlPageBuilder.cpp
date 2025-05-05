@@ -1,6 +1,7 @@
-#include "../include/HtmlPageService.h"
+#include <Arduino.h>
+#include "HtmlPageBuilder.h"
 
-String HtmlPageService::home() {
+String HtmlPageBuilder::home() {
     return R"rawliteral(
         <!DOCTYPE html>
 					<html>
@@ -31,6 +32,6 @@ String HtmlPageService::home() {
     )rawliteral";
 }
 
-String HtmlPageService::notFound() {
+String HtmlPageBuilder::notFound() {
     return "<h1>404 - Not found</h1>";
 }

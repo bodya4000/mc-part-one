@@ -1,7 +1,7 @@
 #pragma once
 #include <Arduino.h>
 
-class HtmlPageService {
+class HtmlPageBuilder {
 public:
     String home();
     String notFound();

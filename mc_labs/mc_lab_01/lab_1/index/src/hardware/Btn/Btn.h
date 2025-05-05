@@ -1,5 +1,5 @@
 #pragma once
-#include "Pins.h"
+#include "../Pins.h"
 
 
 class Btn {
