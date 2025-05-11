@@ -5,27 +5,26 @@
 #include "src/hardware/Pins.h"
 #include "src/services/LedService/LedService.h"
 #include "src/services/WifiConfigurer/WiFiConfigurer.h"
-// #include "src/server/Server.h"
+#include "src/espServer/EspServer.h"
 #include "src/services/StateManager/StateManager.h"
 
-
 LedService* ledService;
-StateManager* stateManager;
+StateManager stateManager;
+EspServer espServer(stateManager);
 Btn* btn;
 
 unsigned long lastChange = 0;
-const unsigned long interval = 300;
-
+const unsigned long interval = 1200;
 
 void setupSerial(bool debug=false) {
   Serial.begin(115200);
-	Serial.setDebugOutput(debug);
+  Serial.setDebugOutput(debug);
   Serial.println("Wemos started its job !");
 }
 
 void setupHardware() {
   static Led blueLed(Pin::D5, Color::GREEN);
-	static Led redLed(Pin::D6, Color::RED);
+  static Led redLed(Pin::D6, Color::RED);
   static Led yellowLed(Pin::D7, Color::YELLOW);
   std::vector<Led*> ledList = { &blueLed, &redLed, &yellowLed };
   ledService = new LedService(ledList);
@@ -33,41 +32,54 @@ void setupHardware() {
 }
 
 void setupState() {
-	stateManager = new StateManager();
-	stateManager->update(false, false);
+  stateManager.update(false, false);          // ✅ вже працюємо з об'єктом
 }
 
 void setupServer() {
-	bool connected = WiFiConfigurer::startAP();
-	if (connected) {
+  bool connected = WiFiConfigurer::connectToWiFi("Redmi 12", "b0000000");
+  if (connected) {
     Serial.println("Connected");
-		// setup server
-	}
+    espServer.begin();
+    Serial.println("Server started");
+  }
 }
 
 void setup() {
   setupSerial();
-  // setupServer();
+  setupServer();
   setupHardware();
   setupState();
 }
 
-
 void loop() {
   if (millis() - lastChange >= interval) {
+    checkSerial();
     handleLedAlgo();
     lastChange = millis();
+    espServer.handleWebSocket();
+  }
+}
+
+void checkSerial() {
+  if (Serial.available() > 0) {
+    char command = Serial.read();
+    switch (command) {
+      case 'h':
+        // stateManager.setSerialPressed(true);
+        break;
+      case 'r':
+        // stateManager.setSerialPressed(false);
+        break;
+    }
   }
 }
 
 void handleLedAlgo() {
-	stateManager->setPhysicalBtnPressed(btn->isPressed());
-  Serial.println(stateManager->isAnyPressed() ? "Btn state: true" : "Btn state: false");
-	if (stateManager->isAnyPressed()) {
-		ledService->go();
-	} else {
-		ledService->stop();
-	}
-  // ledService->go();
-
+  Serial.println("handleLedAlgo: " + String(stateManager.isAnyPressed()));
+  stateManager.setPhysicalBtnPressed(btn->isPressed());
+  if (stateManager.isAnyPressed()) {
+    ledService->go();
+  } else {
+    ledService->stop();
+  }
 }

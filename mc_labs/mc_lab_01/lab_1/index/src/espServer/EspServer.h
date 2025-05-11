@@ -8,13 +8,14 @@
 
 class EspServer {
 	private:
+		StateManager& stateManager; 
 		AsyncWebServer server;
 		HtmlPageBuilder htmlService;
-		StateManager stateManager;
 		PageController pageController;
 		WebBtnController webBtnController;
 	public:
-		EspServer();
+  	EspServer(StateManager& sm);
 		void begin();
+		void handleWebSocket();
 	};
 	

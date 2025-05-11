@@ -5,4 +5,6 @@ class HtmlPageBuilder {
 public:
     String home();
     String notFound();
+		String homeWithWebSocket();
+
 };
