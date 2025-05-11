@@ -1,14 +1,15 @@
 #pragma once
+#include "../Pins.h"
 
 
 class Btn {
 private:
-  int pin;
+	Pin  pin;
   bool btnPreviouslyPressed = false;
   uint32_t pressStartTime = 0;
 
 public:
-  explicit Btn(int pin);
+  Btn(Pin  pin);
   bool isPressed();
   bool wasBtnPreviouslyPressed() const;
   void setBtnWasPressed();

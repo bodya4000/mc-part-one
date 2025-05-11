@@ -1,12 +1,13 @@
 #include <Arduino.h>
-#include "../include/Btn.h"
+#include "Btn.h"
+#include "../Pins.h"
 
-Btn::Btn(int p) : pin(p) {
-  pinMode(pin, INPUT);
+Btn::Btn(Pin  pin) : pin(pin) {
+  pinMode(static_cast<uint8_t>(pin), INPUT);
 }
 
 bool Btn::isPressed() {
-  if (digitalRead(pin) == LOW) {
+  if (digitalRead(static_cast<uint8_t>(pin)) == LOW) {
     if (pressStartTime == 0) {
       pressStartTime = millis();
     }

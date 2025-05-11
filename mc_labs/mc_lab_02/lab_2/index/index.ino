@@ -1,98 +1,85 @@
-#include "include/Led.h"
-#include "include/Pins.h"
-#include "include/Btn.h"
-#include "include/LedService.h"
-#include "include/WiFiService.h"
-#include "include/AsyncWebServerService.h"
-#include <vector>
-
-const char* ssid = "dodkolox";
-const char* password = "12345678";
-
-const uint32_t BLINK_INTERVAL = 1000;
-const uint32_t HOLD_INTERVAL = 500;
+#include <Arduino.h>
+#include "src/hardware/Led/Led.h"
+#include "src/hardware/Btn/Btn.h"
+#include "src/hardware/Led/Color.h"
+#include "src/hardware/Pins.h"
+#include "src/services/LedService/LedService.h"
+#include "src/services/WifiConfigurer/WiFiConfigurer.h"
+#include "src/espServer/EspServer.h"
+#include "src/services/StateManager/StateManager.h"
 
 LedService* ledService;
+StateManager stateManager;
+EspServer espServer(stateManager);
 Btn* btn;
-AsyncWebServerService serverService;
 
-bool hardIsHeld = false;
-bool webIsHeld = false;
-bool serialIsHeld = false;
-uint32_t pressStartTime = 0;
-uint8_t serialData;
-uint32_t previousBlinkTime = 0;
+unsigned long lastChange = 0;
+const unsigned long interval = 1200;
 
-void setupSerial() {
+void setupSerial(bool debug=false) {
   Serial.begin(115200);
-  delay(500);
-  Serial.println("Wemos started its job!");
+  Serial.setDebugOutput(debug);
+  Serial.println("Wemos started its job !");
 }
 
-void setupLeds() {
-  static Led redLed(D4_PIN, Color::RED);
-  static Led yellowLed(D5_PIN, Color::YELLOW);
-  static Led greenLed(D7_PIN, Color::GREEN);
-
-  std::vector<Led*> ledList = { &redLed, &yellowLed, &greenLed };
+void setupHardware() {
+  static Led blueLed(Pin::D5, Color::GREEN);
+  static Led redLed(Pin::D6, Color::RED);
+  static Led yellowLed(Pin::D7, Color::YELLOW);
+  std::vector<Led*> ledList = { &blueLed, &redLed, &yellowLed };
   ledService = new LedService(ledList);
+  btn = new Btn(Pin::D0);
 }
 
-void setupBtn() {
-  btn = new Btn(D6_PIN);
+void setupState() {
+  stateManager.update(false, false);          // ✅ вже працюємо з об'єктом
 }
 
-void handleButton() {
-  if (btn->isPressed()) {
-    if (!btn->wasBtnPreviouslyPressed()) {
-      pressStartTime = millis();
-      btn->setBtnWasPressed();
-    } else if (millis() - pressStartTime >= HOLD_INTERVAL) {
-      hardIsHeld = true;
-    }
-  } else {
-    if (btn->wasBtnPreviouslyPressed()) {
-      hardIsHeld = false;
-    }
-    btn->setBtnWasNotPressed();
-  }
-}
-
-void checkSerial() {
-  if (Serial.available() > 0) {
-    serialData = Serial.read();
-    switch (serialData) {
-      case 'h': serialIsHeld = true; break;
-      case 'r': serialIsHeld = false; break;
-    }
-  }
-}
-
-void blinkLogic() {
-  uint32_t now = millis();
-  if (now - previousBlinkTime >= BLINK_INTERVAL) {
-    previousBlinkTime = now;
-
-    bool reverse = hardIsHeld || webIsHeld || serialIsHeld;
-    ledService->next(reverse);
-    ledService->blinkCurrent(1);
-
-    serverService.sendColor(ledService->getCurrentColor());
+void setupServer() {
+  bool connected = WiFiConfigurer::connectToWiFi("Redmi 12", "b0000000");
+  if (connected) {
+    Serial.println("Connected");
+    espServer.begin();
+    Serial.println("Server started");
   }
 }
 
 void setup() {
   setupSerial();
-  WiFiService::startAP(ssid, password);
-  serverService.setControlRefs(&webIsHeld);
-  serverService.begin();
-  setupLeds();
-  setupBtn();
+  setupServer();
+  setupHardware();
+  setupState();
 }
 
 void loop() {
-  handleButton();
-  checkSerial();
-  blinkLogic();
-  serverService.cleanupClients();
+  if (millis() - lastChange >= interval) {
+    checkSerial();
+    handleLedAlgo();
+    lastChange = millis();
+    espServer.handleWebSocket();
+  }
+}
+
+void checkSerial() {
+  if (Serial.available() > 0) {
+    char command = Serial.read();
+    switch (command) {
+      case 'h':
+        // stateManager.setSerialPressed(true);
+        break;
+      case 'r':
+        // stateManager.setSerialPressed(false);
+        break;
+    }
+  }
+}
+
+void handleLedAlgo() {
+  Serial.println("handleLedAlgo: " + String(stateManager.isAnyPressed()));
+  stateManager.setPhysicalBtnPressed(btn->isPressed());
+  if (stateManager.isAnyPressed()) {
+    ledService->go();
+  } else {
+    ledService->stop();
+  }
 }
