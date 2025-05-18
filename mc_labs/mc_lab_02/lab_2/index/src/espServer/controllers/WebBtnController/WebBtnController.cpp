@@ -40,6 +40,14 @@ void WebBtnController::setupWebSocket() {
         } else if (message == "release") {
           stateManager.setWebBtnPressed(false);
           client->text("WebBtn: Released");
+        } else if (message == "change") {
+          if (stateManager.isLocked()){
+						stateManager.setLocked(false);
+						Serial.print("s"); // we say "s" (stop) to the another controller
+					} else {
+						stateManager.setLocked(true);
+						Serial.print("g"); // we say "g" (go) to the another controller
+					}
         } else {
           client->text("Unknown command");
         }
@@ -47,6 +55,7 @@ void WebBtnController::setupWebSocket() {
     }
   });
 }
+
 
 
 void WebBtnController::handleWebSoclet() {

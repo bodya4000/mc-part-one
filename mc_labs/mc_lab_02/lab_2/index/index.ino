@@ -32,7 +32,7 @@ void setupHardware() {
 }
 
 void setupState() {
-  stateManager.update(false, false);          // ✅ вже працюємо з об'єктом
+  stateManager.update(false, false);
 }
 
 void setupServer() {
@@ -56,28 +56,36 @@ void loop() {
     checkSerial();
     handleLedAlgo();
     lastChange = millis();
-    espServer.handleWebSocket();
   }
+	espServer.handleWebSocket();
 }
 
 void checkSerial() {
   if (Serial.available() > 0) {
     char command = Serial.read();
-    switch (command) {
-      case 'h':
-        // stateManager.setSerialPressed(true);
-        break;
-      case 'r':
-        // stateManager.setSerialPressed(false);
-        break;
+
+    if (command == '\r' || command == '\n' || command == ' ') {
+      return;
+    }
+
+    Serial.print("Received command: ");
+    Serial.println(command);
+
+    if (command == 'g') {
+      stateManager.setLocked(false);
+    } else if (command == 's') {
+      stateManager.setLocked(true);
     }
   }
 }
 
+
 void handleLedAlgo() {
-  Serial.println("handleLedAlgo: " + String(stateManager.isAnyPressed()));
+  Serial.println("Is Locked 2: " + String(stateManager.isLocked()));
+//  Serial.println("Is Locked 2: " + String(stateManager.isLocked()));
+
   stateManager.setPhysicalBtnPressed(btn->isPressed());
-  if (stateManager.isAnyPressed()) {
+  if (!stateManager.isLocked() && stateManager.isAnyPressed()) {
     ledService->go();
   } else {
     ledService->stop();

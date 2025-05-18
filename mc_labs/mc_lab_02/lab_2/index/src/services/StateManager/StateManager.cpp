@@ -9,6 +9,14 @@ void StateManager::setPhysicalBtnPressed(bool pressed) {
   physicalBtnPressed = pressed;
 }
 
+void StateManager::setLocked(bool value) {
+  locked = value;
+}
+
+bool StateManager::isLocked() const { 
+  return locked;
+}
+
 bool StateManager::isWebBtnPressed() const {
   return webBtnPressed;
 }

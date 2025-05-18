@@ -46,7 +46,7 @@ String HtmlPageBuilder::homeWithWebSocket() {
 					font-family: Arial, sans-serif;
 				}
 
-				#Button {
+				button {
 					font-size: 24px;
 					padding: 20px 50px;
 					border: none;
@@ -58,9 +58,10 @@ String HtmlPageBuilder::homeWithWebSocket() {
 					transition: all 0.3s ease;
 					position: relative;
 					overflow: hidden;
+					margin: 20px;
 				}
 
-				#Button::after {
+				button::after {
 					content: "";
 					position: absolute;
 					top: 0;
@@ -71,26 +72,28 @@ String HtmlPageBuilder::homeWithWebSocket() {
 					transition: left 0.4s ease;
 				}
 
-				#Button:hover::after {
+				button:hover::after {
 					left: 100%;
 				}
 
-				#Button:hover {
+				button:hover {
 					transform: scale(1.05);
 					box-shadow: 0 10px 20px rgba(0, 0, 0, 0.3);
 				}
 
-				#Button:active {
+				button:active {
 					transform: scale(0.98);
 				}
 			</style>
 		</head>
 		<body>
 			<button id="Button">🖱️ Hold Me</button>
+			<button id="ChangeBtn">🔁 Change State</button>
 
 			<script>
 				const socket = new WebSocket(`ws://${location.host}/ws`);
 				const btn = document.getElementById('Button');
+				const changeBtn = document.getElementById('ChangeBtn');
 				let holdTimeout;
 
 				socket.onopen = () => {
@@ -114,6 +117,10 @@ String HtmlPageBuilder::homeWithWebSocket() {
 				btn.addEventListener('mouseup', () => {
 					clearTimeout(holdTimeout);
 					socket.send('release');
+				});
+
+				changeBtn.addEventListener('click', () => {
+					socket.send('change');
 				});
 			</script>
 		</body>

@@ -32,7 +32,7 @@ void setupHardware() {
 }
 
 void setupState() {
-  stateManager.update(false, false);          // ✅ вже працюємо з об'єктом
+  stateManager.update(false, false);  
 }
 
 void setupServer() {
